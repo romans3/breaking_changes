@@ -1,17 +1,20 @@
 {
   "domain": "breaking_changes",
   "name": "Breaking Changes",
+  "version": "2025.1.0",
   "documentation": "https://github.com/custom-components/breaking_changes",
   "issue_tracker": "https://github.com/custom-components/breaking_changes/issues",
   "requirements": [
-    "pyhaversion>=21.3.0",
-    "integrationhelper>=0.2.2",
-    "awesomeversion"
+    "awesomeversion>=24.6.0"
   ],
   "dependencies": [],
   "codeowners": [
-    "@ludeeus"
+    "@ludeeus",
+    "@romans3"
   ],
+  "config_flow": true,
   "iot_class": "cloud_polling",
-  "version": "0.0.0"
+  "loggers": [
+    "custom_components.breaking_changes"
+  ]
 }
