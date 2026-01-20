@@ -1,33 +1,16 @@
-"""Constants for breaking_changes."""
-# Base component constants
+"""Constants for the Breaking Changes integration."""
+
+from datetime import timedelta
+from homeassistant.const import Platform
+
 DOMAIN = "breaking_changes"
-DOMAIN_DATA = "{}_data".format(DOMAIN)
-INTEGRATION_VERSION = "main"
-PLATFORMS = ["sensor"]
-ISSUE_URL = "https://github.com/custom-components/breaking_changes/issues"
 
-STARTUP = f"""
--------------------------------------------------------------------
-{DOMAIN}
-Version: {INTEGRATION_VERSION}
-This is a custom component
-If you have any issues with this you need to open an issue here:
-https://github.com/custom-components/breaking_changes/issues
--------------------------------------------------------------------
-"""
+PLATFORMS: list[Platform] = [Platform.SENSOR]
 
-# Operational
-URL = "https://hachanges.entrypoint.xyz/v1/{0}"
+URL_BREAKING_CHANGES = "https://hachanges.entrypoint.xyz/v1/{version}"
+URL_HA_PYPI = "https://pypi.org/pypi/homeassistant/json"
 
-# Icons
-ICON = "mdi:package-up"
-
-# Configuration
-CONF_NAME = "name"
-CONF_SCAN_INTERVAL = "scan_interval"
-
-# Defaults
 DEFAULT_NAME = "Potential breaking changes"
 
-# Interval in seconds
-INTERVAL = 300
+DEFAULT_SCAN_INTERVAL = timedelta(minutes=5)
+MINIMUM_VERSION = "2021.3"
