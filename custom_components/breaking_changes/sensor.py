@@ -1,61 +1,55 @@
-"""Sensor platform for breaking_changes."""
-from datetime import timedelta
-from homeassistant.helpers.entity import Entity
-from . import update_data
-from .const import DOMAIN_DATA, ICON
+"""Sensor platform for Breaking Changes."""
 
-SCAN_INTERVAL = timedelta(seconds=5)
+from __future__ import annotations
+
+from typing import Any
+
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from .const import DOMAIN, DEFAULT_NAME
+from .coordinator import BreakingChangesCoordinator
 
 
-async def async_setup_platform(hass, _config, async_add_entities, discovery_info=None):
-    """Setup sensor platform."""
-    async_add_entities([BreakingChangesSensor(hass, discovery_info)], True)
+async def async_setup_entry(hass, entry, async_add_entities):
+    """Set up Breaking Changes sensor from a config entry."""
+    data = hass.data[DOMAIN][entry.entry_id]
+    coordinator: BreakingChangesCoordinator = data["coordinator"]
+
+    async_add_entities(
+        [
+            BreakingChangesSensor(
+                coordinator=coordinator,
+                name=DEFAULT_NAME,
+            )
+        ]
+    )
 
 
-class BreakingChangesSensor(Entity):
-    """breaking_changes Sensor class."""
+class BreakingChangesSensor(CoordinatorEntity[BreakingChangesCoordinator], SensorEntity):
+    """Sensor that exposes potential breaking changes."""
 
-    def __init__(self, hass, config):
-        self.hass = hass
-        self._attr = {}
-        self._state = None
-        self._name = config["name"]
+    _attr_icon = "mdi:package-up"
 
-    async def async_update(self):
-        """Update the sensor."""
-        # Send update "signal" to the component
-        await update_data(self.hass)
-
-        # Check the data and update the value.
-        self._state = len(
-            self.hass.data[DOMAIN_DATA].get("potential", {}).get("changes", [])
-        )
-        self._state = 0 if self._state < 0 else self._state
-
-        # Set/update attributes
-        self._attr = self.hass.data[DOMAIN_DATA].get("potential", {})
-
-    @property
-    def should_poll(self):
-        """Return the name of the sensor."""
-        return True
+    def __init__(self, coordinator: BreakingChangesCoordinator, name: str) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_name = name
+        self._attr_unique_id = f"{DOMAIN}_potential_breaking_changes"
 
     @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
+    def native_value(self) -> int:
+        """Return the number of potential breaking changes."""
+        data = self.coordinator.data or {}
+        changes = data.get("changes", [])
+        return max(len(changes), 0)
 
     @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._state
-
-    @property
-    def icon(self):
-        """Return the icon of the sensor."""
-        return ICON
-
-    @property
-    def extra_state_attributes(self):
-        """Return the state attributes."""
-        return self._attr
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return extra attributes."""
+        data = self.coordinator.data or {}
+        return {
+            "changes": data.get("changes", []),
+            "versions": data.get("versions", []),
+            "covered": list(data.get("covered", [])),
+        }
